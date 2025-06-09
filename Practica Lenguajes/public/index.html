@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Analizador Pokémon LFP</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Analizador Léxico Pokémon</h1>
+
+<nav class="navbar">
+  <ul>
+    <li><a href="#" id="navHome">🏠 Home</a></li>
+    <li><a href="#errores">📄 Error Report</a></li>
+    <li class="dropdown">
+      <a href="#">📂 Archivo ▾</a>
+      <div class="dropdown-content">
+        <button id="limpiarBtn">🧹 Limpiar Editor</button>
+        <label class="archivo-btn">
+          📁 Cargar Archivo
+          <input type="file" id="cargarArchivo" accept=".pklfp" hidden />
+        </label>
+        <button id="guardarBtn">💾 Guardar Archivo</button>
+      </div>
+    </li>
+  </ul>
+</nav>
+
+
+  <!-- Sustituye el textarea -->
+<div id="editor" style="border:1px solid #ccc; height:300px;"></div>
+
+  <button id="analizarBtn">Analizar</button>
+
+  <h2>Tokens Reconocidos</h2>
+  <table border="1">
+    <thead>
+      <tr><th>#</th><th>Fila</th><th>Columna</th><th>Lexema</th><th>Token</th></tr>
+    </thead>
+    <tbody id="tablaTokens"></tbody>
+  </table>
+
+  <h2>Top 6 Pokémon</h2>
+  <div id="equipo"></div>
+
+  <script type="module" src="../dist/ui.js"></script>
+</body>
+
+<h1>Analizador Léxico Pokémon</h1>
+
+<!-- Menú de Archivo -->
+<div>
+  <label><strong>Archivo:</strong></label>
+  <button id="limpiarBtn">Limpiar Editor</button>
+  <input type="file" id="cargarArchivo" accept=".pklfp" />
+  <button id="guardarBtn">Guardar como .pklfp</button>
+</div><br>
+
+<!-- Editor visual -->
+<div id="editor" style="border:1px solid #ccc; height:300px;"></div>
+
+
+
+</html>
