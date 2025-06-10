@@ -1,24 +1,11 @@
-import { EditorState } from '@codemirror/state';
-import { EditorView, keymap } from '@codemirror/view';
-import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
+import { EditorState } from "@codemirror/state";
+import { EditorView, keymap } from "@codemirror/view";
+import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { analizarEntrada } from "./lexer";
+import { extraerPokemones } from "./parser";
+import { seleccionarTop6 } from "./selector";
 
-import { analizarEntrada } from './lexer';
-import { extraerPokemones } from './parser';
-import { seleccionarTop6 } from './selector';
-
-const limpiarBtn = document.getElementById("limpiarBtn") as HTMLButtonElement;
-const cargarArchivo = document.getElementById("cargarArchivo") as HTMLInputElement;
-const guardarBtn = document.getElementById("guardarBtn") as HTMLButtonElement;
-const analizarBtn = document.getElementById("analizarBtn") as HTMLButtonElement;
-const tablaTokens = document.getElementById("tablaTokens") as HTMLTableSectionElement;
-const tablaErrores = document.getElementById("tablaErrores") as HTMLTableSectionElement;
-const equipoDiv = document.getElementById("equipo") as HTMLDivElement;
-
-const navHome = document.getElementById("navHome") as HTMLAnchorElement;
-navHome.addEventListener("click", () => location.reload());
-
-
-//  Reutilizable para cada nuevo estado
+// 🧠 Función reutilizable para crear estado del editor
 function crearEstado(doc: string): EditorState {
   return EditorState.create({
     doc,
@@ -30,33 +17,71 @@ function crearEstado(doc: string): EditorState {
   });
 }
 
-// Crear el estado inicial del editor
-const editor = new EditorView({
-  state: crearEstado(`Jugador: "Ash"
-Pokemon: "pikachu" tipo: normal salud: 35 ataque: 55 defensa: 40`),
-  parent: document.getElementById('editor')!
+// 📦 Verifica que el div#editor exista antes de crear el editor
+const editorContainer = document.getElementById("editor");
+let editor: EditorView;
+
+if (editorContainer) {
+  editor = new EditorView({
+    state: crearEstado(""), // Editor vacío al inicio
+    parent: editorContainer
+  });
+} else {
+  console.error("No se encontró el elemento #editor en el HTML.");
+}
+
+// 🔗 Referencias del DOM
+const limpiarBtn = document.getElementById("limpiarBtn") as HTMLButtonElement | null;
+const cargarArchivo = document.getElementById("cargarArchivo") as HTMLInputElement | null;
+const guardarBtn = document.getElementById("guardarBtn") as HTMLButtonElement | null;
+const analizarBtn = document.getElementById("analizarBtn") as HTMLButtonElement | null;
+const tablaTokens = document.getElementById("tablaTokens") as HTMLTableSectionElement | null;
+const tablaErrores = document.getElementById("tablaErrores") as HTMLTableSectionElement | null;
+const equipoDiv = document.getElementById("equipo") as HTMLDivElement | null;
+const navHome = document.getElementById("navHome") as HTMLAnchorElement | null;
+const archivoMenu = document.getElementById("archivoMenu") as HTMLAnchorElement | null;
+const archivoDropdown = document.getElementById("archivoDropdown") as HTMLElement | null;
+
+// 🔁 Funcionalidad de menú archivo desplegable (por clic)
+if (archivoMenu && archivoDropdown) {
+  archivoMenu.addEventListener("click", (e) => {
+    e.preventDefault();
+    archivoDropdown.classList.toggle("show");
+  });
+
+  document.addEventListener("click", (e) => {
+    if (
+      !archivoMenu.contains(e.target as Node) &&
+      !archivoDropdown.contains(e.target as Node)
+    ) {
+      archivoDropdown.classList.remove("show");
+    }
+  });
+}
+
+// 🔄 Botón Home
+navHome?.addEventListener("click", () => location.reload());
+
+// 🧹 Limpiar editor
+limpiarBtn?.addEventListener("click", () => {
+  if (editor) editor.setState(crearEstado(""));
 });
 
-// Limpiar el editor
-limpiarBtn.addEventListener("click", () => {
-  editor.setState(crearEstado(""));
-});
-
-// Cargar archivo .pklfp
-cargarArchivo.addEventListener("change", (event) => {
+// 📁 Cargar archivo
+cargarArchivo?.addEventListener("change", (event) => {
   const archivo = (event.target as HTMLInputElement).files?.[0];
   if (!archivo) return;
 
   const reader = new FileReader();
   reader.onload = () => {
     const contenido = reader.result as string;
-    editor.setState(crearEstado(contenido));
+    if (editor) editor.setState(crearEstado(contenido));
   };
   reader.readAsText(archivo);
 });
 
-// Guardar archivo .pklfp
-guardarBtn.addEventListener("click", () => {
+// 💾 Guardar archivo
+guardarBtn?.addEventListener("click", () => {
   const texto = editor.state.doc.toString();
   const blob = new Blob([texto], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -68,8 +93,8 @@ guardarBtn.addEventListener("click", () => {
   URL.revokeObjectURL(url);
 });
 
-// Analizar entrada
-analizarBtn.addEventListener("click", async () => {
+// 🔍 Analizar archivo
+analizarBtn?.addEventListener("click", async () => {
   const texto = editor.state.doc.toString();
   const tokens = analizarEntrada(texto);
   const pokemones = extraerPokemones(tokens);
@@ -80,8 +105,9 @@ analizarBtn.addEventListener("click", async () => {
   await renderEquipo(top6);
 });
 
-// Mostrar tokens
+// 🧾 Render tokens
 function renderTablaTokens(tokens: any[]) {
+  if (!tablaTokens) return;
   tablaTokens.innerHTML = '';
   tokens.forEach((t, i) => {
     const row = document.createElement('tr');
@@ -96,27 +122,36 @@ function renderTablaTokens(tokens: any[]) {
   });
 }
 
-// Mostrar errores léxicos
+// ⚠️ Render errores
 function renderErrores(tokens: any[]) {
+  if (!tablaErrores) return;
   tablaErrores.innerHTML = '';
   let index = 1;
-  for (const t of tokens) {
-    if (t.tipo === 'Desconocido') {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${index++}</td>
-        <td>${t.fila}</td>
-        <td>${t.columna}</td>
-        <td>${t.valor}</td>
-        <td>Desconocido</td>
-      `;
-      tablaErrores.appendChild(row);
-    }
+  const errores = tokens.filter(t => t.tipo === 'Desconocido');
+
+  if (errores.length === 0) {
+    const row = document.createElement('tr');
+    row.innerHTML = `<td colspan="5" style="text-align:center;">Sin errores léxicos</td>`;
+    tablaErrores.appendChild(row);
+    return;
+  }
+
+  for (const t of errores) {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${index++}</td>
+      <td>${t.fila}</td>
+      <td>${t.columna}</td>
+      <td>${t.valor}</td>
+      <td>Desconocido</td>
+    `;
+    tablaErrores.appendChild(row);
   }
 }
 
-// Mostrar sprites de Pokémon
+// 🧬 Mostrar equipo Pokémon
 async function renderEquipo(pokemones: any[]) {
+  if (!equipoDiv) return;
   equipoDiv.innerHTML = '';
   for (const p of pokemones) {
     const div = document.createElement('div');
@@ -134,7 +169,7 @@ async function renderEquipo(pokemones: any[]) {
   }
 }
 
-// Obtener sprite desde la PokeAPI
+// 📷 Obtener sprite desde la PokeAPI
 async function obtenerSprite(nombre: string): Promise<string> {
   try {
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${nombre}`);
@@ -144,4 +179,3 @@ async function obtenerSprite(nombre: string): Promise<string> {
     return 'https://via.placeholder.com/96?text=?';
   }
 }
-
