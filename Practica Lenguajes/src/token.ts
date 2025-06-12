@@ -1,5 +1,6 @@
 export type TokenType = 
   | 'PalabraReservada'
+  | 'Identificador'
   | 'Cadena'
   | 'Numero'
   | 'DosPuntos'

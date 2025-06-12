@@ -14,6 +14,7 @@ export function analizarEntrada(input: string): Token[] {
   while (i < input.length) {
     const char = input[i];
 
+    // Nueva línea
     if (char === '\n') {
       fila++;
       columna = 1;
@@ -33,7 +34,9 @@ export function analizarEntrada(input: string): Token[] {
       let lexema = '"';
       let j = i + 1;
       let colIni = columna;
+
       while (j < input.length && input[j] !== '"') {
+        if (input[j] === '\n') break;
         lexema += input[j];
         j++;
       }
@@ -45,38 +48,47 @@ export function analizarEntrada(input: string): Token[] {
         i = j + 1;
         continue;
       } else {
-        // Error: cadena sin cerrar
         tokens.push({ tipo: 'Desconocido', valor: lexema, fila, columna: colIni });
         i = j;
         continue;
       }
     }
 
-    // Número
+    // Número (entero o decimal)
     if (/[0-9]/.test(char)) {
       let lexema = '';
       let colIni = columna;
-      while (i < input.length && /[0-9]/.test(input[i])) {
+      let hasDot = false;
+
+      while (i < input.length && /[0-9.]/.test(input[i])) {
+        if (input[i] === '.') {
+          if (hasDot) break;
+          hasDot = true;
+        }
         lexema += input[i];
         i++;
         columna++;
       }
+
       tokens.push({ tipo: 'Numero', valor: lexema, fila, columna: colIni });
       continue;
     }
 
-    // Palabra
+    // Palabra (identificadores o reservadas)
     if (/[a-zA-Z]/.test(char)) {
       let lexema = '';
       let colIni = columna;
+
       while (i < input.length && /[a-zA-Z]/.test(input[i])) {
         lexema += input[i];
         i++;
         columna++;
       }
+
       const tipo: TokenType = palabrasReservadas.includes(lexema)
         ? 'PalabraReservada'
-        : 'Desconocido';
+        : 'Identificador';
+
       tokens.push({ tipo, valor: lexema, fila, columna: colIni });
       continue;
     }
@@ -89,7 +101,7 @@ export function analizarEntrada(input: string): Token[] {
       continue;
     }
 
-    // Carácter desconocido
+    // Cualquier otro carácter no reconocido
     tokens.push({ tipo: 'Desconocido', valor: char, fila, columna });
     i++;
     columna++;

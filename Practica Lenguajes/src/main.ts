@@ -16,5 +16,5 @@ const pokemones = extraerPokemones(tokens);
 console.table(pokemones);
 
 const top6 = seleccionarTop6(pokemones);
-console.log('TOP 6 Pokémon:');
+console.log("TOP 6 Pokémon:");
 console.table(top6);
