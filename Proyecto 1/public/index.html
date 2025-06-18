@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Analizador Léxico LFP</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <a class="navbar-brand" href="#">Analizador Léxico LFP</a>
+<div class="collapse navbar-collapse justify-content-center show">
+  <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="homeBtn">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="errorReportBtn">Error Report</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="archivoDropdown" role="button" data-bs-toggle="dropdown">
+            Archivo
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" id="limpiarEditorBtn">Limpiar editor</a></li>
+            <li><label class="dropdown-item" for="fileInput" style="cursor: pointer;">Cargar archivo</label></li>
+            <li><a class="dropdown-item" href="#" id="guardarArchivoBtn">Guardar archivo</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+    <textarea id="inputText" class="form-control mb-3" placeholder="texto o archivo .pklfp"></textarea>
+    <button id="analyzeBtn" class="btn btn-primary mb-4">Analizar</button>
+
+    <h3>Tokens Reconocidos</h3>
+    <table class="table table-bordered" id="tokensTable">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Lexema</th>
+          <th>Fila</th>
+          <th>Columna</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <h3>Errores Léxicos</h3>
+    <table class="table table-bordered" id="errorsTable">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Lexema</th>
+          <th>Fila</th>
+          <th>Columna</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <input type="file" id="fileInput" accept=".pklfp" hidden />
+  </main>
+
+  <script src="main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

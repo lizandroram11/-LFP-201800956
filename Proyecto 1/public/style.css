@@ -1,0 +1,11 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f8f9fa;
+}
+
+textarea {
+  font-family: monospace;
+  font-size: 14px;
+  resize: vertical;
+  height: 200px;
+}
